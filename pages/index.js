@@ -8,7 +8,7 @@ export default function Home() {
         <title>JAK Whatsapp Clone 2</title>
         <link rel="icon" href="/favicon.ico" />
       </Head>
-      <h1>Yolo</h1>
+      
     </div>
   )
 }
