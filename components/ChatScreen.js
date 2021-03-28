@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import styled from 'styled-components';
 import { auth, db } from '../firebase';
 import { useAuthState } from 'react-firebase-hooks/auth';
@@ -18,6 +18,7 @@ function ChatScreen({ chat, messages }) {
 	const [input, setInput] = useState('');
 	const [user] = useAuthState(auth);
 	const router = useRouter();
+	const endOfMessagesRef = useRef(null);
 	const [messagesSnapshot] = useCollection(
 		db
 			.collection('chats')
@@ -48,6 +49,12 @@ function ChatScreen({ chat, messages }) {
 			))
 		}
 	};
+	const scrollToBottom = () => {
+		endOfMessagesRef.current.scrollIntoView({
+			behavior: "smooth",
+			block: "start",
+		});
+	};
 	const sendMessage = (e) => {
 		e.preventDefault();
 		db.collection('users').doc(user.uid).set({
@@ -60,6 +67,7 @@ function ChatScreen({ chat, messages }) {
 			photoURL: user.photoURL,
 		});
 		setInput('');
+		scrollToBottom();
 	};
 	const recipient = recipientSnapshot?.docs?.[0]?.data();
 	const recipientEmail = getRecipientEmail(chat.users, user)
@@ -95,11 +103,11 @@ function ChatScreen({ chat, messages }) {
 			</Header>
 			<MessageContainer>
 				{showMessages()}
-				<EndOfMessage />
+				<EndOfMessage ref={endOfMessagesRef} />
 			</MessageContainer>
 			<InputContainer>
 				<InsertEmoticonIcon style={{ "cursor": "pointer" }} />
-				<Input value={input} onChange={(e) => setInput(e.target.value)} />
+				<Input placeholder={"Chat with " + recipientEmail} value={input} onChange={(e) => setInput(e.target.value)} />
 				<button hidden disabled={!input} type="submit" onClick={sendMessage}>Send Message</button>
 				<MicIcon style={{ "cursor": "pointer" }} />
 			</InputContainer>
@@ -138,7 +146,9 @@ const MessageContainer = styled.div`
 	background-color: #E5DED8;
 	min-height: 90vh;
 `;
-const EndOfMessage = styled.div``;
+const EndOfMessage = styled.div`
+	margin-bottom: 50px;
+`;
 const InputContainer = styled.form`
 	display: flex;
 	align-items: center;
